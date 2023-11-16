@@ -1,0 +1,80 @@
+#include <iostream> 
+#include <cmath> 
+ 
+using namespace std; 
+ 
+// Функции системы нелинейных уравнений 
+double f(double x, double y) { 
+    return x * x + y * y - 84; 
+} 
+ 
+double g(double x, double y) { 
+    return x - y + 1; 
+} 
+ 
+// Производные функций системы по x и y 
+double df_dx(double x, double y) { 
+    return 2 * x; 
+} 
+ 
+double df_dy(double x, double y) { 
+    return 2 * y; 
+} 
+ 
+double dg_dx(double x, double y) { 
+    return 1; 
+} 
+ 
+double dg_dy(double x, double y) { 
+    return -1; 
+} 
+ 
+// Исчерпывающий спуск для системы уравнений 
+double exhaustiveSearch(double x, double y, double step_size, int num_steps) { 
+    double min_value = f(x, y) * f(x, y) + g(x, y) * g(x, y); // Сумма квадратов уравнений 
+    double optimal_step = step_size; 
+ 
+    for (int i = 1; i <= num_steps; ++i) { 
+        double current_x = x - i * step_size * df_dx(x, y); 
+        double current_y = y - i * step_size * df_dy(x, y); 
+        double current_value = f(current_x, current_y) * f(current_x, current_y) + g(current_x, current_y) * g(current_x, current_y); 
+ 
+        // Проверка, является ли текущее значение минимальным 
+        if (current_value < min_value) { 
+            min_value = current_value; 
+            optimal_step = i * step_size; 
+        } 
+    } 
+ 
+    return optimal_step; 
+} 
+ 
+// Метод градиентного спуска с исчерпывающим спуском для системы уравнений 
+void gradientDescentWithExhaustiveSearch(double& x, double& y, double learning_rate, int iterations) { 
+    for (int i = 0; i < iterations; ++i) { 
+        double step_size = exhaustiveSearch(x, y, learning_rate, 10); //шаги для исчерпывающего спуска 
+ 
+        x -= step_size * (f(x, y) * df_dx(x, y) + g(x, y) * dg_dx(x, y)); 
+        y -= step_size * (f(x, y) * df_dy(x, y) + g(x, y) * dg_dy(x, y)); 
+ 
+        // Вывод текущих значений на каждой итерации 
+        cout << "Iteration " << i + 1 << ": x = " << x << ", y = " << y << ", Step size = " << step_size << endl; 
+    } 
+} 
+ 
+int main() { 
+    double x = 0.0;  // начальное значение x 
+    double y = 0.0;  // начальное значение y 
+    double learning_rate = 0.001; //шаг исчерпывающего спуска 
+    int iterations = 10000; //количество итераций 
+    gradientDescentWithExhaustiveSearch(x, y, learning_rate, iterations); 
+ 
+    // Вывод финального результата 
+    cout << "Final result: x = " << x << ", y = " << y << endl; 
+ 
+    return 0; 
+}
+
+//Чем меньше шаг, тем точнее. Если -4 в функции, то шаг = 0.1, итераций = 100. Чем меньше шаг, тем больше итераций для решении задачи.
+//308 страница, формула 7.57
+//7.56 формула
